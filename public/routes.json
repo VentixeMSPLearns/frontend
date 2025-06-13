@@ -12,5 +12,3 @@
     ]
   }
 }
-
-//AI generated fix due to missing navigationFallback, this allows SPA routing to work correctly
