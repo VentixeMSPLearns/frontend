@@ -96,8 +96,57 @@ const BookEvent = () => {
 
   const handleConfirmBooking = async () => {
     if (bookingFunds < event.price) return;
-    const success = await withdrawFunds(event.price);
-    if (success) setBookingConfirmed(true);
+    if (event.isSoldOut || event.availableTickets <= 0) return;
+    try {
+      const bookingResponse = await fetch(
+        "https://bookingsservice-ventixe-win24-msp.azurewebsites.net/api/bookings",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            eventId: event.id,
+          }),
+        }
+      );
+
+      if (!bookingResponse.ok) {
+        const errorText = await bookingResponse.text();
+        throw new Error(errorText);
+      }
+      const bookingData = await bookingResponse.json();
+      console.log("Booking created:", bookingData);
+
+      const success = await withdrawFunds(event.price);
+      if (!success) {
+        alert("Booking succeeded, but fund withdrawal failed.");
+        return false;
+      }
+      const updatedTickets = event.availableTickets - 1;
+      const ticketUpdateResponse = await fetch(
+        "https://eventsservice-win24-msp.azurewebsites.net/api/events/update-tickets",
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventId: event.id,
+            newAvailableTickets: updatedTickets,
+          }),
+        }
+      );
+      if (!ticketUpdateResponse.ok) {
+        const errorText = await ticketUpdateResponse.text();
+        throw new Error(
+          `Booking created but failed to update tickets: ${errorText}`
+        );
+      }
+
+      setBookingConfirmed(true);
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Failed to confirm booking");
+      return false;
+    }
   };
 
   return (
@@ -113,9 +162,11 @@ const BookEvent = () => {
 
       {!bookingConfirmed ? (
         <>
-          {bookingFunds < event.price ? (
+          {event.isSoldOut || event.availableTickets <= 0 ? (
+            <p className="sz-18 red">This event is sold out.</p>
+          ) : bookingFunds < event.price ? (
             <>
-              <p className="insufficient-funds-msg" style={{ color: "red" }}>
+              <p className="sz-18 red">
                 You don’t have enough funds to book this event.
               </p>
               <button className="btn btn-secondary" onClick={openAddFundsModal}>
@@ -124,7 +175,7 @@ const BookEvent = () => {
             </>
           ) : (
             <button className="btn btn-primary" onClick={handleConfirmBooking}>
-              Confirm Booking &amp; Pay
+              Confirm Booking
             </button>
           )}
         </>

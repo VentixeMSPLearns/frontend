@@ -4,8 +4,8 @@ import QRCode from "react-qr-code";
 import { useScreenSize } from "../context/ScreenSizeContext.jsx";
 import TicketModal from "../modals/TicketModal.jsx";
 import EventDetailsModal from "../modals/EventDetailsModal.jsx";
-// TODO: Change the generated QR from event.id to ticket.id which is retrieved using the ticket or booking service
-const BookingCard = ({ event }) => {
+
+const BookingCard = ({ event, bookingId }) => {
   const navigate = useNavigate();
   const { isDesktop } = useScreenSize();
   const [showModal, setShowModal] = useState(false);
@@ -54,7 +54,7 @@ const BookingCard = ({ event }) => {
           Details
         </button>
         <button
-          className={`btn btn-primary .btn-ticket ${event.id}`}
+          className={`btn btn-primary .btn-ticket ${bookingId}`}
           onClick={() => handleButtonClick("ticket")}
         >
           Ticket
@@ -64,7 +64,7 @@ const BookingCard = ({ event }) => {
       {!isDesktop && accordionOpen && (
         <div className="ticket-accordion">
           <h4 className="secondary sz-18">Scan your Ticket</h4>
-          <QRCode className="ticket-qr" value={event.id} size={150} />
+          <QRCode className="ticket-qr" value={bookingId} size={150} />
         </div>
       )}
 
@@ -72,7 +72,13 @@ const BookingCard = ({ event }) => {
         showModal &&
         modalType === "ticket" &&
         (console.log("showing ticket modal"),
-        (<TicketModal event={event} onClose={closeModal} />))}
+        (
+          <TicketModal
+            event={event}
+            bookingId={bookingId}
+            onClose={closeModal}
+          />
+        ))}
       {isDesktop && showModal && modalType === "details" && (
         <EventDetailsModal event={event} onClose={closeModal} />
       )}

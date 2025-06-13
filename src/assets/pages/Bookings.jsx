@@ -1,38 +1,60 @@
-// import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import BookingCard from "../components/BookingCard.jsx";
 const Bookings = () => {
-  // const [bookings, setBookings] = useState([]);
+  const { user } = useAuth();
+  const [bookings, setBookings] = useState([]);
+  const [events, setEvents] = useState([]);
 
-  // const fetchBookings = async () => {
-  //   const res = await fetch("");
+  const fetchBookingsAndEvents = async () => {
+    try {
+      const bookingsResponse = await fetch(
+        `https://bookingsservice-ventixe-win24-msp.azurewebsites.net/api/bookings/user/${user.id}`
+      );
+      if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings");
 
-  //   if (res.ok) {
-  //     const data = await res.json();
-  //     setBookings(data);
-  //   }
-  // };
-  // useEffect(() => {
-  //   fetchBookings();
-  // }, []);
+      const bookingsData = await bookingsResponse.json();
+      setBookings(bookingsData);
 
-  const mockEvent = {
-    id: "test-1",
-    title: "Mocked Adventure Gear Show",
-    date: "June 5, 2029 - 3:00pm",
-    location: "Rocky Ridge Exhibition Hall, Denver, CO",
-    description:
-      "Join us for the Adventure Gear Show, showcasing the latest in outdoor equipment and apparel. Perfect for adventurers of all levels!",
-    price: 40,
-    imageUrl: "https://picsum.photos/300/200",
-    category: "Art&Design",
+      const eventIds = [...new Set(bookingsData.map((b) => b.eventId))];
+
+      if (eventIds.length === 0) {
+        setEvents([]);
+        return;
+      }
+
+      const eventsResponse = await fetch(
+        "https://eventsservice-win24-msp.azurewebsites.net/api/events/by-ids",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ eventIds }),
+        }
+      );
+      if (!eventsResponse.ok) throw new Error("Failed to fetch events");
+
+      const eventsData = await eventsResponse.json();
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Error loading bookings/events:", error);
+    }
   };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchBookingsAndEvents();
+    }
+  }, [user]);
 
   return (
     <div id="bookings" className="booking-list">
-      {/* {bookings.map((event) => (
-        <BookingCard key={event.id} event={event} />
-      ))} */}
-      <BookingCard event={mockEvent} />
+      {bookings.map((booking) => {
+        const event = events.find((e) => e.id === booking.eventId);
+        if (!event) return null;
+        return (
+          <BookingCard key={booking.id} event={event} bookingId={booking.id} />
+        );
+      })}
     </div>
   );
 };
