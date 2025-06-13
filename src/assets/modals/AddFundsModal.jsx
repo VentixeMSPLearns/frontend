@@ -6,6 +6,10 @@ const AddFundsModal = ({ onClose, onFundsAdded }) => {
 
   const validate = () => {
     const newErrors = {};
+    if (amount.includes(",")) {
+      newErrors.amount = "Use a dot (.) as decimal separator, not a comma.";
+    }
+
     const num = parseFloat(amount);
 
     if (!amount) {
@@ -21,13 +25,14 @@ const AddFundsModal = ({ onClose, onFundsAdded }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-
     onFundsAdded(parseFloat(amount));
   };
+
   const handleCloseClick = (e) => {
     e.stopPropagation();
     onClose();
   };
+
   return (
     <div className="modal">
       <div className="modal-content card">

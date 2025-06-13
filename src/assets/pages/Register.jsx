@@ -25,6 +25,11 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
     setErrors({});
 
     try {
@@ -36,10 +41,51 @@ const Register = () => {
         acceptTerms: formData.acceptTerms,
       });
 
-      navigate("/"); // redirect on success
+      window.alert("Registration successful! Please log in.");
+
+      navigate("/login"); // redirect on success
     } catch (error) {
       setErrors({ general: `Error: ${error.message}` });
     }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/; // 6+ chars with required types
+    const usernameRegex = /^[a-zA-Z0-9._-]+$/; // Adjust to match Identity's exact config
+
+    if (!formData.username.trim()) {
+      newErrors.username = "Username is required.";
+    } else if (!usernameRegex.test(formData.username)) {
+      newErrors.username =
+        "Username can only contain letters, numbers, dots, underscores, and hyphens.";
+    }
+
+    if (!formData.email) {
+      newErrors.email = "Email is required.";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Email format is invalid.";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (!passwordRegex.test(formData.password)) {
+      newErrors.password =
+        "Password must include uppercase, lowercase, number, and special character.";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password.";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = "You must accept the terms and conditions.";
+    }
+
+    return newErrors;
   };
 
   return (
@@ -49,7 +95,7 @@ const Register = () => {
           <h1>Register</h1>
         </div>
 
-        <form className="card-body" onSubmit={handleSubmit} novalidate>
+        <form className="card-body" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
             <label htmlFor="username" className="form-label">
               Username

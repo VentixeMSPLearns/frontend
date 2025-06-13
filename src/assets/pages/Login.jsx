@@ -7,7 +7,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
     rememberMe: false,
   });
@@ -22,13 +22,30 @@ const Login = () => {
     }));
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.username.trim()) {
+      newErrors.username = "Username is required";
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = "Password is required";
+    }
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setErrors({});
 
     try {
       await login({
-        email: formData.email,
+        username: formData.username,
         password: formData.password,
       });
 
@@ -46,23 +63,25 @@ const Login = () => {
         </div>
         <form className="card-body" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email
+            <label htmlFor="username" className="form-label">
+              Username
             </label>
             <div className="field-group">
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="username"
+                name="username"
+                type="text"
                 className={`form-control ${
-                  errors.email ? "invalid-input" : ""
+                  errors.username ? "invalid-input" : ""
                 }`}
-                value={formData?.email}
+                value={formData?.username}
                 onChange={handleChange}
                 required
               />
-              {errors.email && (
-                <span className="field-validation-error">{errors.email}</span>
+              {errors.username && (
+                <span className="field-validation-error">
+                  {errors.username}
+                </span>
               )}
             </div>
           </div>

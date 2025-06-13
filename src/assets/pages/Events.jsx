@@ -2,52 +2,27 @@ import React, { useEffect, useState } from "react";
 import EventCard from "../components/EventCard.jsx";
 const Events = () => {
   const [events, setEvents] = useState([]);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await fetch(
+        "https://eventsservice-win24-msp.azurewebsites.net/api/events"
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setEvents(data);
+      } else {
+        console.error("Failed to fetch events:", res.status);
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
   useEffect(() => {
-    const mockEvents = [
-      {
-        id: 1,
-        title: "Adventure Gear Show",
-        date: "June 5, 2029 - 3:00pm",
-        location: "Rocky Ridge Exhibition Hall, Denver, CO",
-        description:
-          "An exhibition showcasing the latest in outdoor gear and equipment.",
-        imageUrl: "https://picsum.photos/seed/200/300",
-        price: 40,
-      },
-      {
-        id: 2,
-        title: "Symphony Under the Stars",
-        date: "April 5, 2029 - 5:00pm",
-        location: "Rocky Ridge Exhibition Hall, Denver, CO",
-        description:
-          "A magical evening of orchestral music under the night sky.",
-        imageUrl: "https://picsum.photos/seed/220/300",
-        price: 40,
-      },
-      {
-        id: 3,
-        title: "Art & Design Expo",
-        date: "July 15, 2029 - 7:00pm",
-        location: "Rocky Ridge Exhibition Hall, Denver, CO",
-        description: "An exhibition featuring the latest in art and design.",
-        imageUrl: "https://picsum.photos/seed/300/200",
-        price: 40,
-      },
-    ];
-    setEvents(mockEvents);
+    fetchEvents();
   }, []);
-
-  // const fetchEvents = async () => {
-  //   const res = await fetch("");
-
-  //   if (res.ok) {
-  //     const data = await res.json();
-  //     setEvents(data);
-  //   }
-  // };
-  // useEffect(() => {
-  //   fetchEvents();
-  // }, []);
 
   return (
     <div id="events" className="event-list">
