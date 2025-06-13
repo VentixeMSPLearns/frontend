@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useAuth } from "../context/AuthContext";
+import { LoadingContext } from "../context/LoadingContext";
 import BookingCard from "../components/BookingCard.jsx";
 const Bookings = () => {
   const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [events, setEvents] = useState([]);
+  const { setLoading } = useContext(LoadingContext);
 
   const fetchBookingsAndEvents = async () => {
+    if (!user || !user.id) return;
+    setLoading(true);
     try {
       const bookingsResponse = await fetch(
         `https://bookingsservice-ventixe-win24-msp.azurewebsites.net/api/bookings/user/${user.id}`
@@ -37,6 +41,8 @@ const Bookings = () => {
       setEvents(eventsData);
     } catch (error) {
       console.error("Error loading bookings/events:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

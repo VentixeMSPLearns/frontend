@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { LoadingContext } from "../context/LoadingContext";
 import AddFundsModal from "../modals/AddFundsModal";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { setLoading } = useContext(LoadingContext);
 
   const [showModal, setShowModal] = useState(false);
   const [bookingFunds, setBookingFunds] = useState(user.bookingFunds);
@@ -15,6 +17,8 @@ const Dashboard = () => {
   const closeAddFundsModal = () => setShowModal(false);
 
   const fetchWalletBalance = async () => {
+    if (!user || !user.id) return;
+    setLoading(true);
     try {
       const response = await fetch(
         `https://walletsservice.azurewebsites.net/api/wallet/${user.id}`
@@ -26,10 +30,14 @@ const Dashboard = () => {
       setBookingFunds(walletData.balance);
     } catch (error) {
       console.error("Error fetching wallet balance:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchBookedEvents = async () => {
+    if (!user || !user.id) return;
+    setLoading(true);
     try {
       const bookingsResponse = await fetch(
         `https://bookingsservice-ventixe-win24-msp.azurewebsites.net/api/bookings/user/${user.id}`
@@ -67,6 +75,8 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching booked events:", error);
       setBookedEvents([]); // clear on error to avoid old data
+    } finally {
+      setLoading(false);
     }
   };
   // Initial fetch for booked events and wallet balance, dependent on user id change

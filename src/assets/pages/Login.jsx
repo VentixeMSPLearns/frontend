@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useAuth } from "../context/AuthContext"; // Adjust path as needed
 import { useNavigate } from "react-router-dom";
+import { LoadingContext } from "../context/LoadingContext.jsx";
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { setLoading } = useContext(LoadingContext);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -35,6 +37,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -52,6 +55,8 @@ const Login = () => {
       navigate("/"); // redirect on success
     } catch (error) {
       setErrors({ general: `Error: ${error.message}` });
+    } finally {
+      setLoading(false);
     }
   };
 

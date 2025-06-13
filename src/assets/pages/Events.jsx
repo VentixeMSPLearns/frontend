@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import EventCard from "../components/EventCard.jsx";
+import { LoadingContext } from "../context/LoadingContext.jsx";
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const { setLoading } = useContext(LoadingContext);
 
   const fetchEvents = async () => {
+    setLoading(true);
     try {
       const res = await fetch(
         "https://eventsservice-win24-msp.azurewebsites.net/api/events"
@@ -17,6 +20,8 @@ const Events = () => {
       }
     } catch (error) {
       console.error("Error fetching events:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -13,49 +13,52 @@ import Login from "./assets/pages/Login";
 import Dashboard from "./assets/pages/Dashboard";
 import BookEvent from "./assets/pages/BookEvent";
 import "./App.css";
+import { LoadingProvider } from "./assets/context/LoadingContext";
 
 function App() {
   return (
     <ScreenSizeProvider>
-      <AuthProvider>
-        <ThemeProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Events />} />
-                <Route path="/events/:id" element={<EventDetails />} />
-                <Route
-                  path="/bookings"
-                  element={
-                    <PrivateRoute>
-                      <Bookings />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <PrivateRoute>
-                      <Dashboard />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/bookevent/:id"
-                  element={
-                    <PrivateRoute>
-                      <BookEvent />
-                    </PrivateRoute>
-                  }
-                />
-              </Route>
+      <LoadingProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Events />} />
+                  <Route path="/events/:id" element={<EventDetails />} />
+                  <Route
+                    path="/bookings"
+                    element={
+                      <PrivateRoute>
+                        <Bookings />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <PrivateRoute>
+                        <Dashboard />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/bookevent/:id"
+                    element={
+                      <PrivateRoute>
+                        <BookEvent />
+                      </PrivateRoute>
+                    }
+                  />
+                </Route>
 
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </BrowserRouter>
-        </ThemeProvider>
-      </AuthProvider>
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+              </Routes>
+            </BrowserRouter>
+          </ThemeProvider>
+        </AuthProvider>
+      </LoadingProvider>
     </ScreenSizeProvider>
   );
 }

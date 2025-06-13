@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { LoadingContext } from "../context/LoadingContext";
 import AddFundsModal from "../modals/AddFundsModal";
 
 const BookEvent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { setLoading } = useContext(LoadingContext);
 
   const event = location.state?.event;
 
@@ -16,6 +18,8 @@ const BookEvent = () => {
 
   // Fetch balance function to reuse after PATCH requests
   const fetchWalletBalance = async () => {
+    if (!user || !user.id) return;
+    setLoading(true);
     try {
       const response = await fetch(
         `https://walletsservice.azurewebsites.net/api/wallet/${user.id}`
@@ -25,6 +29,8 @@ const BookEvent = () => {
       setBookingFunds(data.balance);
     } catch (error) {
       console.error("Error fetching wallet balance:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
